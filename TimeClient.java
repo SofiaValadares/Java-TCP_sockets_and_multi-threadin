@@ -20,36 +20,25 @@ public class TimeClient {
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
 
-            writer.println("new Date()?".toString());
-
-            int number = 0;
-            Scanner read = new Scanner(System.in);
-
-            while (true) {
-                System.out.println("Deseja digitar um novo valor [Y/n]?");
-
-                String option = read.nextLine();
-
-                if (option.equals("Y")) {
-                    number = read.nextInt();
-                    writer.println(number);
-                } else if (option.equals("n")) {
-                    break;
-                } else {
-                    System.out.println("Digite uma opcao valida: Y-sim ou n-nao");
-                }
-
-            }
-
-
-
             InputStream input = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
- 
-            String time = reader.readLine();
- 
-            System.out.println(time);
- 
+            BufferedReader server = new BufferedReader(new InputStreamReader(input));
+
+            int number;
+            BufferedReader commandLine = new BufferedReader(new InputStreamReader(System.in));
+            String option, result;
+
+            do {
+                System.out.print("Client - Digite um valor: ");
+                number = Integer.parseInt(commandLine.readLine());
+                writer.println(number);
+                result = server.readLine();
+                System.out.println("Server reply - " + result);
+                System.out.println("Client - Deseja digitar um novo valor [Y/n]?");
+                option = commandLine.readLine();
+                if(!option.equals("Y")) {
+                    break;
+                }
+            } while (true);
  
         } catch (UnknownHostException ex) {
  

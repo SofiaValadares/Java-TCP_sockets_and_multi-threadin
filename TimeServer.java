@@ -20,29 +20,27 @@ public class TimeServer {
             System.out.println("Server is listening on port " + port);
 
             int sum = 0; //Change to various pcs when treating multithreading
-
+            Socket socket = serverSocket.accept();
+            System.out.println("New client connected"); //Add Client ID when treating multithreads
             while (true) {
-                Socket socket = serverSocket.accept();
-                System.out.println("New client connected"); //Add Client ID when treating multithreads
 
                 InputStream input = socket.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
-                if(input.available() != 0) {
-                    String number = reader.readLine();
-                    OutputStream output = socket.getOutputStream();
-                    PrintWriter writer = new PrintWriter(output, true);
+                String line = reader.readLine();
 
-                    int readNumber = validator.validInteger(number);
+                OutputStream output = socket.getOutputStream();
+                PrintWriter writer = new PrintWriter(output, true);
 
-                    if(readNumber == -1) {
-                        writer.println("Please input a valid number");
-                    } else {
-                        writer.println("Number read: "+readNumber+" and summed");
-                        sum += readNumber;
-                        writer.println("Current sum: "+sum);
-                    }
+                int readNumber = validator.validInteger(line);
+
+                if(readNumber == -1) {
+                    writer.println("Please input a valid number");
+                } else {
+                    sum += readNumber;
+                    writer.println("Number read: "+readNumber+" and summed. Current sum "+sum);
                 }
+
             }
  
         } catch (IOException ex) {
