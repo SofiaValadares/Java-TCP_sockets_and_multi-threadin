@@ -1,3 +1,5 @@
+package src.pt.fe.up.cpd.t4g11.main.view;
+
 import javax.swing.*;
 import java.awt.*;
 

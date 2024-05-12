@@ -1,3 +1,5 @@
+package src.pt.fe.up.cpd.t4g11.main.controller;
+
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
@@ -16,10 +18,8 @@ public class Client {
         String hostname = args[0];
         int port = Integer.parseInt(args[1]);
 
-        // Fazer aqui o sistema de login do player, tipo pegar o nome e fazer login
         System.out.print("Nick name: ");
         String nickName = scanner.nextLine();
-
 
         try (Socket socket = new Socket(hostname, port)) {
             System.out.println("Connected to server.");
@@ -72,6 +72,8 @@ public class Client {
             shutdownExecutors(listenerExecutor, senderExecutor);
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());
+        } catch (ConnectException c) {
+            System.out.println("Connection to server refused!");
         } catch (IOException e) {
             // Tratar outras exceções, se necessário
             e.printStackTrace();
