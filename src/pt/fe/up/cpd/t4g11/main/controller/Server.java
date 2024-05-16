@@ -8,19 +8,26 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
 
     public static final List<Player> players = new ArrayList<>();
+    private static final byte NUM_OF_MAIN_THREADS = 2;
 
     public static void main(String[] args) {
         if (args.length < 1) return;
         int port = Integer.parseInt(args[0]);
 
+
+
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             printMessageInServer("Server started. Waiting for clients...");
-            Thread heartbeatThread = new Thread(new HeartbeatMonitor());
-            heartbeatThread.start();
+            /*Thread heartbeat = new Thread(new HeartbeatMonitor());
+            heartbeat.start();*/
+            Thread gameManager = new Thread(new GameManager());
+            gameManager.start();
 
             // loop to add new players
             while (true) {
@@ -42,33 +49,10 @@ public class Server {
                 addPlayer(playerName, clientSocket);
 
                 printPlayersInQueue();
-
-                if(canStartGame()) {
-                    startNewGame();
-                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static boolean canStartGame() {
-        short counter = 0;
-        for(Player player : players) {
-            if(!player.isInGame() && player.isConnected()) {
-                counter++;
-            }
-            if(counter == 2) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static void startNewGame() {
-        Thread game = new Thread(new GameManager());
-        game.start();
     }
 
     private static void addPlayer(String playerName, Socket clientSocket) {
@@ -89,11 +73,13 @@ public class Server {
 
     private static void printPlayersInQueue() {
         printMessageInServer("Connected players: ", false);
-        for (Player player : players) {
-            if(player.isConnected())
-                printMessageInServer(player.getName() + ", ", false);
+        synchronized (players) {
+            for (Player player : players) {
+                if(player.isConnected())
+                    printMessageInServer(player.getName() + ", ", false);
+            }
+            printMessageInServer("");
         }
-        printMessageInServer("");
     }
 
     private static Socket getNewClient(ServerSocket serverSocket) {
@@ -123,11 +109,13 @@ public class Server {
     }
 
     private static boolean isPlayerConnected(String playerName) {
-        for (Player player : players)
-            if(player.getName().equals(playerName) && player.isConnected())
-                return true;
+        synchronized (players) {
+            for (Player player : players)
+                if(player.getName().equals(playerName) && player.isConnected())
+                    return true;
 
-        return false;
+            return false;
+        }
     }
 
     public static void sendMessageToClient(Socket clientSocket, String message) throws IOException {

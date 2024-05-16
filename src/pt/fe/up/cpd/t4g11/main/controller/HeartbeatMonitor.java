@@ -10,24 +10,24 @@ import java.net.SocketException;
 
 import static java.lang.Thread.sleep;
 import static src.pt.fe.up.cpd.t4g11.main.controller.Server.players;
-import static src.pt.fe.up.cpd.t4g11.main.controller.Server.*;
 
-// To see if some player disconected
+
 public class HeartbeatMonitor implements Runnable {
     @Override
-    public synchronized void run() {
+    public void run() {
         while (true) {
             try {
-                for (Player player : players) {
-                    Socket socket = player.getPlayerSocket();
-                    if(socket.isClosed()) {
-                        player.disconnect();
-                        System.out.println("Player " + player.getName() + " disconnected (no heartbeat).");
+                synchronized (players) {
+                    for (Player player : players) {
+                        if(!player.isConnected()) {
+                            player.disconnect();
+                            System.out.println("Player " + player.getName() + " disconnected (no heartbeat).");
+                        }
                     }
                 }
 
                 try {
-                    sleep(10000); // Verifica a cada 10 segundos
+                    sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
