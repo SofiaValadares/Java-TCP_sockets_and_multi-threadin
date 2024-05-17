@@ -52,16 +52,28 @@ public class Game implements Runnable {
                 printMessageInServer(i.getMessage());
             }
 
-            while (true) {
+            for (int i = 0; i < 20; i++) {
                 if(!allPlayersInGame(gameId)) {
                     if(!reconnectionChecker(screenManager,gameId)) break;
+                    i--;
                     continue;
                 }
                 screenChecker(screenManager, gameId);
                 Calculation calc = MathGame.getRandomCalculation();
                 screenManager.displayMessageInScreens("There is new calculation to do: " + calc);
                 // TODO: Wait for user input.
+                short results = calc.getResult();
+                Player winnerOfTheRound = screenManager.playersAnser(results);
+
+                screenManager.displayMessageInScreensLow("\nPlayer " + winnerOfTheRound.getName() + " was the faster!!!\n Anser was " + results + "\n");
                 // TODO: The player that answers first gets points using calc.getPoints() then move to next
+                winnerOfTheRound.increasePoints(calc.givePoints());
+
+                try {
+                    Thread.sleep(3000); // 3 segundos
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 // TODO: Add amount of times that it will run until the game finishes
             }
         } else {

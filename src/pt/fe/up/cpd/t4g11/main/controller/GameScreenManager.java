@@ -37,4 +37,30 @@ public class GameScreenManager {
             screen.displayMessage(message);
         }
     }
+
+    public void displayMessageInScreensLow(String message) {
+        for(GameScreen screen: screens) {
+            screen.displayMessageLow(message);
+        }
+    }
+
+
+
+    public Player playersAnser(short results) {
+        while (true) {
+            for (GameScreen screen : screens) {
+                if (screen.lastInput != null) {
+                    screen.displayMessageLow("Your gess: " + screen.lastInput + "\n");
+                    if (screen.lastInput == results) {
+                        screen.displayMessageLow("Corect anser, crongratulations!\n");
+                        screen.lastInput = null;
+                        return screen.getClient();
+                    } else {
+                        screen.displayMessageLow("Wrong anser :(\n");
+                        screen.lastInput = null;
+                    }
+                }
+            }
+        }
+    }
 }

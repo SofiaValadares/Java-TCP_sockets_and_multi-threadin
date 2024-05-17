@@ -4,6 +4,8 @@ import src.pt.fe.up.cpd.t4g11.main.model.Player;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import static src.pt.fe.up.cpd.t4g11.main.controller.Server.sendMessageToClient;
 
 public class GameScreen extends JFrame {
     private final JTextArea outputArea;
+    private final JTextField inputField; // Novo campo de entrada
+    public Integer lastInput = null;
     private final Player client;
     private boolean open;
 
@@ -41,6 +45,23 @@ public class GameScreen extends JFrame {
         outputArea.setForeground(Color.WHITE);
         JScrollPane scrollPane = new JScrollPane(outputArea);
         add(scrollPane, BorderLayout.CENTER);
+
+        // Inicializa e configura o campo de entrada
+        inputField = new JTextField();
+        inputField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String input = inputField.getText().trim();
+                if (!input.isEmpty()) {
+                    // Aqui você pode manipular o número inteiro fornecido pelo usuário
+                    lastInput = Integer.parseInt(input);
+                    // Exemplo de exibição do número na área de saída
+                    // Limpa o campo de entrada após processamento
+                    inputField.setText("");
+                }
+            }
+        });
+        add(inputField, BorderLayout.SOUTH);
 
         openScreen();
     }
