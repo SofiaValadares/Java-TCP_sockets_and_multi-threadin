@@ -7,33 +7,28 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.lang.management.PlatformLoggingMXBean;
 
-import static src.pt.fe.up.cpd.t4g11.main.controller.Server.players;
+import static src.pt.fe.up.cpd.t4g11.main.controller.Server.sendMessageToClient;
 
 public class GameScreen extends JFrame {
     private final JTextArea outputArea;
-    private final String client;
+    private final Player client;
     private boolean open;
 
-    public GameScreen(String clientName) {
-        this.client = clientName;
-        setTitle("Client - "+ client);
+    public GameScreen(Player client) {
+        this.client = client;
+        setTitle("Client - "+ client.getName());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                synchronized (players) {
-                    for(Player player : players)
-                        if(player.getName().equals(client)) {
-                            try {
-                                player.disconnect();
-                                setVisible(false);
-                                open = false;
-                            } catch (IOException i) {
-                                i.getStackTrace();
-                            }
-                        }
+                try {
+                    sendMessageToClient(client.getPlayerSocket(), "exit");
+                    client.disconnect();
+                    setVisible(false);
+                    open = false;
+                } catch (IOException i) {
+                    i.getStackTrace();
                 }
             }
         });
@@ -59,7 +54,7 @@ public class GameScreen extends JFrame {
         open = true;
     }
 
-    public String getClient() {
+    public Player getClient() {
         return client;
     }
 

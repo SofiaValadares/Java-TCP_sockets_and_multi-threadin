@@ -3,91 +3,128 @@ package src.pt.fe.up.cpd.t4g11.main.model;
 import src.pt.fe.up.cpd.t4g11.main.controller.GameScreenManager;
 import src.pt.fe.up.cpd.t4g11.main.view.GameScreen;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import static java.lang.Thread.sleep;
-import static src.pt.fe.up.cpd.t4g11.main.controller.Server.players;
-import static src.pt.fe.up.cpd.t4g11.main.controller.Server.printMessageInServer;
+import static src.pt.fe.up.cpd.t4g11.main.controller.Server.*;
 
 public class Game implements Runnable {
     
     private static short lastGameId = 0;
     private final short gameId;
+    private List<Player> gamePlayers;
 
     public Game() {
         lastGameId++;
         this.gameId = lastGameId;
+    }
 
+    @Override
+    public void run() {
+        short gameId = lastGameId;
+        gamePlayers = new ArrayList<>();
+        getPlayers(gameId);
+        GameScreenManager screenManager = new GameScreenManager(gameId);
+        playGame(screenManager, gameId);
+    }
+
+    public void getPlayers(short gameId) {
+        for(Player player: players)
+            if(player.getGameId() == gameId)
+                this.gamePlayers.add(player);
     }
 
     public short getGameId() {
         return this.gameId;
     }
 
-    @Override
-    public void run() {
-        short gameId = (short)(lastGameId-1);
-        GameScreenManager screenManager = new GameScreenManager(gameId);
-        while(true) {
-            playGame(screenManager, gameId);
-        }
-    }
+    private void playGame(GameScreenManager screenManager, short gameId) {
 
-    private static void playGame(GameScreenManager screenManager, short gameId) {
         boolean ready = loadingScreen(screenManager,gameId);
         if(ready) {
+            try {
+                screenManager.displayMessageInScreens("Lets play!");
+                sleep(2000);
+            } catch (InterruptedException i) {
+                printMessageInServer("Exception in game " + gameId);
+                printMessageInServer(i.getMessage());
+            }
+
             while (true) {
                 if(!allPlayersInGame(gameId)) {
-                    reconnectionChecker(screenManager,gameId);
+                    if(!reconnectionChecker(screenManager,gameId)) break;
+                    continue;
                 }
                 screenChecker(screenManager, gameId);
+                Calculation calc = MathGame.getRandomCalculation();
+                screenManager.displayMessageInScreens("There is new calculation to do: " + calc);
+                // TODO: Wait for user input.
+                // TODO: The player that answers first gets points using calc.getPoints() then move to next
+                // TODO: Add amount of times that it will run until the game finishes
             }
         } else {
             for (GameScreen screen: screenManager.getScreens())
                 screen.dispose();
+            removePlayersFromGame(gameId);
             Thread.currentThread().interrupt();
-            removePlayersFromGame();
+        }
+
+        if(noPlayerInGame(gameId)) {
+            removePlayersFromGame(gameId);
+            Thread.currentThread().interrupt();
+        } else {
+            //TODO: Display winner and close game
         }
     }
 
-    private static void screenChecker(GameScreenManager screenManager, short gameId) {
-        synchronized (players) {
-            for (Player player: players) {
-                if(player.isConnected() && player.getGameId() == gameId) {
-                    for(GameScreen screen: screenManager.getScreens()){
-                        if(screen.getClient().equals(player.getName()) && !screen.isOpen()) {
-                            screen.openScreen();
-                            printMessageInServer("Opened screen");
-                        }
+    private void screenChecker(GameScreenManager screenManager, short gameId) {
+        for (Player player: gamePlayers) {
+            if(player.isConnected() && player.getGameId() == gameId) {
+                for(GameScreen screen: screenManager.getScreens()){
+                    if(screen.getClient().getName().equals(player.getName()) && !screen.isOpen()) {
+                        screen.openScreen();
                     }
                 }
             }
         }
     }
 
-    private static void removePlayersFromGame() {
+    private static void removePlayersFromGame(short gameId) {
         synchronized (players) {
-            for(Player player : players)
-                player.setGameId((short) -1);
+            for(int i = 0; i < players.size(); i++) {
+                if(players.get(i).getGameId() == gameId) {
+                    try {
+                        if(!players.get(i).getPlayerSocket().isClosed())
+                            sendMessageToClient(players.get(i).getPlayerSocket(), "exit");
+                    } catch (IOException e) {
+                        printMessageInServer("Error in removing " + players.get(i).getName());
+                        printMessageInServer(e.getMessage());
+                    }
+                    players.remove(players.get(i));
+                }
+            }
         }
     }
 
-    private static boolean loadingScreen(GameScreenManager screenManager, short gameId) {
-        byte time = 20; boolean gameReady = true;
+    private boolean loadingScreen(GameScreenManager screenManager, short gameId) {
+        byte time = 20;
+        boolean gameReady = true;
+        String disconnectedPlayers;
         while (time >= 0) {
-            if(allPlayersInGame(gameId)) {
-                for (GameScreen screen : screenManager.getScreens()) {
-                    screen.displayMessage("Minimum of 2 players reached. Game starts in " + time + " seconds...");
-                }
-                screenChecker(screenManager, gameId);
-            }
+            if(allPlayersInGame(gameId))
+                screenManager.displayMessageInScreens("Minimum of 2 players reached. Game starts in " + time + " seconds...");
             else {
                 gameReady = false;
                 time = 60;
                 while (time >= 0) {
-                    for(GameScreen screen: screenManager.getScreens())
-                        screen.displayMessage("Game start canceled, wait for player to reconnect in " + time + " seconds");
+                    disconnectedPlayers = getDisconnectedPlayers();
+                    screenManager.displayMessageInScreens("Game start canceled, wait for player(s) " + disconnectedPlayers + " to reconnect in " + time);
                     if(allPlayersInGame(gameId)) {
                         time = 20;
                         gameReady = true;
+                        screenChecker(screenManager, gameId);
                         break;
                     }
                     try {
@@ -110,25 +147,52 @@ public class Game implements Runnable {
         return gameReady;
     }
 
-    private static boolean allPlayersInGame(short gameId) {
-        for(Player player: players)
-            if(player.getPlayerId() == gameId && player.isConnected())
-                return true;
+    private byte getAmountOfPlayersInGame(short gameId) {
+        byte sum = 0;
+        for(Player player: gamePlayers)
+            if(player.getGameId() == gameId && player.isConnected())
+                sum++;
 
-        return false;
-
+        return sum;
     }
 
-    private static void reconnectionChecker(GameScreenManager screenManager, short gameId) {
+    public String getDisconnectedPlayers() {
+        StringBuilder disconnected = new StringBuilder();
+        for(Player player : gamePlayers)
+            if(!player.isConnected())
+                disconnected.append(player.getName()).append(", ");
+
+        if(disconnected.length() >= 2) {
+            disconnected.deleteCharAt(disconnected.length()-1); // Remove whitespace
+            disconnected.deleteCharAt(disconnected.length()-1); // Remove comma
+        }
+        return disconnected.toString();
+    }
+
+    private boolean allPlayersInGame(short gameId) {
+        return getAmountOfPlayersInGame(gameId) == gamePlayers.size();
+    }
+
+    private boolean noPlayerInGame(short gameId) {
+        return getAmountOfPlayersInGame(gameId) == 0;
+    }
+
+    private boolean reconnectionChecker(GameScreenManager screenManager, short gameId) {
         short time = 60;
+        String disconnectedPlayers;
         while (time >= 0) {
-            for(GameScreen screen: screenManager.getScreens()) {
-                if(screen.isOpen())
-                    screen.displayMessage("Player disconnected, wait for player to reconnect in " + time + " seconds");
+            if(noPlayerInGame(gameId)) {
+                printMessageInServer("All players in game " + gameId + " disconnected. Waiting for " + time + " seconds until they reconnect");
+            } else {
+                disconnectedPlayers = getDisconnectedPlayers();
+                for(GameScreen screen: screenManager.getScreens()) {
+                    if(!screen.isOpen() && screen.getClient().isConnected()) screen.openScreen();
+                    screen.displayMessage("Player(s) " + disconnectedPlayers + " disconnected, wait for player to reconnect in " + time + " seconds");
+                }
             }
 
             if(allPlayersInGame(gameId)) {
-                break;
+                return true;
             }
             try {
                 sleep(1000); // Wait for 1 second between each iteration
@@ -137,6 +201,7 @@ public class Game implements Runnable {
             }
             time--;
         }
+        return false;
     }
 
 }

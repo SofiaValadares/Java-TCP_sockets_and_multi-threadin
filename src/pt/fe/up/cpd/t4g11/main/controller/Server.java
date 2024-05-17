@@ -1,15 +1,12 @@
 package src.pt.fe.up.cpd.t4g11.main.controller;
 
+import src.pt.fe.up.cpd.t4g11.main.model.Game;
 import src.pt.fe.up.cpd.t4g11.main.model.Player;
-
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
 
@@ -20,14 +17,9 @@ public class Server {
         if (args.length < 1) return;
         int port = Integer.parseInt(args[0]);
 
-
-
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             printMessageInServer("Server started. Waiting for clients...");
-            /*Thread heartbeat = new Thread(new HeartbeatMonitor());
-            heartbeat.start();*/
-            Thread gameManager = new Thread(new GameManager());
-            gameManager.start();
+            GameManager gameManager = new GameManager();
 
             // loop to add new players
             while (true) {
@@ -48,6 +40,13 @@ public class Server {
 
                 addPlayer(playerName, clientSocket);
 
+                if(gameManager.isGameStartable()) {
+                    Game game = new Game();
+                    gameManager.setPlayersInGame(game.getGameId());
+                    Thread thread = new Thread(game);
+                    thread.start();
+                }
+
                 printPlayersInQueue();
             }
         } catch (IOException e) {
@@ -67,15 +66,15 @@ public class Server {
                     returned = true;
                 }
 
-            if(!returned) players.add(player);
+            if(!returned) { players.add(player); }
         }
     }
 
-    private static void printPlayersInQueue() {
-        printMessageInServer("Connected players: ", false);
+    private static void printPlayersInQueue() throws IOException{
+        printMessageInServer("Players waiting for game: ", false);
         synchronized (players) {
             for (Player player : players) {
-                if(player.isConnected())
+                if(player.isConnected() && !player.isInGame())
                     printMessageInServer(player.getName() + ", ", false);
             }
             printMessageInServer("");
@@ -86,7 +85,6 @@ public class Server {
         Socket clientSocket; // TODO: Can the socket be different when reconnecting?
         try {
             clientSocket = serverSocket.accept();
-            printMessageInServer("New client connected: " + clientSocket);
             return clientSocket;
         } catch (IOException i) {
             printMessageInServer("Error in accepting connection from client");
@@ -121,7 +119,6 @@ public class Server {
     public static void sendMessageToClient(Socket clientSocket, String message) throws IOException {
         PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
         writer.println(message);
-        writer.close();
     }
 
     // Do here class to thread play game, frinst need game class

@@ -4,13 +4,12 @@ import java.util.Random;
 
 public class MathGame {
 
-    public static short getRandomCalculation() {
+    public static Calculation getRandomCalculation() {
         short num1 = getRandomShort();
         short num2 = getRandomShort();
         Operand op = getRandomOperator();
 
-        Calculation calculation = new Calculation(num1, op, num2);
-        return calculation.getResult();
+        return new Calculation(num1, op, num2);
     }
 
     // Helper method to generate a random short number

@@ -3,10 +3,6 @@ package src.pt.fe.up.cpd.t4g11.main.controller;
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class Client {
 
@@ -29,31 +25,11 @@ public class Client {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(nickName);
 
-            ScheduledExecutorService listenerExecutor = Executors.newSingleThreadScheduledExecutor();
-            ScheduledExecutorService senderExecutor = Executors.newSingleThreadScheduledExecutor();
+            Thread notifier = new Thread(new ClientToServerNotifier(out));
+            notifier.start();
 
-
-            // Tarefa para ouvir as mensagens do servidor
-            listenerExecutor.scheduleWithFixedDelay(() -> {
-                try {
-                    String response;
-                    while ((response = serverReader.readLine()) != null) {
-                        System.out.println("\nServer: " + response);
-                        if (response.equals("Error: Player is already connected.")) {
-                            shutdownExecutors(listenerExecutor, senderExecutor);
-                            System.exit(0);
-                        }
-                    }
-                } catch (IOException e) {
-                    System.out.println("Connection closed by server.");
-                    shutdownExecutors(listenerExecutor, senderExecutor);
-                    System.exit(0);
-                }
-            }, 0, 100, TimeUnit.MILLISECONDS);
-
-            // Tarefa para enviar mensagens vazias para o servidor
-            senderExecutor.scheduleWithFixedDelay(() -> out.println(""), 0, 100, TimeUnit.MILLISECONDS);
-
+            Thread receiver = new Thread(new ServerToClientReciever(serverReader));
+            receiver.start();
 
             // Loop para enviar mensagens adicionais para o servidor
             while (true) {
@@ -69,7 +45,6 @@ public class Client {
                 out.println(message);
             }
 
-            shutdownExecutors(listenerExecutor, senderExecutor);
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());
         } catch (ConnectException c) {
@@ -77,14 +52,6 @@ public class Client {
         } catch (IOException e) {
             // Tratar outras exceções, se necessário
             e.printStackTrace();
-        }
-    }
-
-    private static void shutdownExecutors(ExecutorService... executors) {
-        for (ExecutorService executor : executors) {
-            if (executor != null) {
-                executor.shutdown();
-            }
         }
     }
 

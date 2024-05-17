@@ -30,4 +30,33 @@ public class Calculation {
             }
         }
     }
+
+    public short givePoints() {
+        return 5;
+    }
+
+    private String getOperandChar() {
+        switch (op) {
+            case SUM -> {
+                return  "+";
+            }
+            case SUB -> {
+                return "-";
+            }
+            case MULT -> {
+                return "*";
+            }
+            case DIV -> {
+                return "/";
+            }
+            default -> {
+                return "none";
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return this.num1 + " " + getOperandChar() + " " + this.num2;
+    }
 }

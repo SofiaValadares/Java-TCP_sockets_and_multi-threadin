@@ -2,6 +2,7 @@ package src.pt.fe.up.cpd.t4g11.main.model;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Player {
     private static int lastPlayerId = 0;
@@ -11,6 +12,7 @@ public class Player {
     private final short points;
     private boolean inGame;
     private short gameId;
+    private final ReentrantLock reentrantLock;
 
     public Player(String name, Socket playerSocket) {
         lastPlayerId++;
@@ -20,34 +22,57 @@ public class Player {
         this.name = name;
         this.points = 0;
         this.inGame = false;
+        this.reentrantLock = new ReentrantLock();
     }
 
     public int getPlayerId() {
-        return  this.playerId;
+        reentrantLock.lock();
+        try {
+            return this.playerId;
+        } finally {
+            reentrantLock.unlock();
+        }
+
     }
 
     public String getName() {
-        return this.name;
+        reentrantLock.lock();
+        try {
+            return this.name;
+        } finally {
+            reentrantLock.unlock();
+        }
+
     }
 
     public Socket getPlayerSocket() {
-        return this.playerSocket;
+        reentrantLock.lock();
+        try {
+            return this.playerSocket;
+        } finally {
+            reentrantLock.unlock();
+        }
+
     }
 
     public boolean isConnected() {
+        reentrantLock.lock();
         try {
             if(this.playerSocket.getInputStream().read() != -1) {
+                reentrantLock.unlock();
                 return true;
             }
         } catch (IOException i) {
             i.getStackTrace();
-            return false;
         }
+        reentrantLock.unlock();
         return false;
     }
 
     public void disconnect() throws IOException {
+        reentrantLock.lock();
         this.playerSocket.close();
+        reentrantLock.unlock();
     }
 
     public short getPoints() {
@@ -55,7 +80,13 @@ public class Player {
     }
 
     public boolean isInGame() {
-        return inGame;
+        reentrantLock.lock();
+        try {
+            return inGame;
+        } finally {
+            reentrantLock.unlock();
+        }
+
     }
 
     public void removeFromGame() {
@@ -63,18 +94,30 @@ public class Player {
     }
 
     public void setInGame() {
+        reentrantLock.lock();
         this.inGame = true;
+        reentrantLock.unlock();
     }
 
     public void setPlayerSocket(Socket newSocket) {
+        reentrantLock.lock();
         this.playerSocket = newSocket;
+        reentrantLock.unlock();
     }
 
     public short getGameId() {
-        return gameId;
+        reentrantLock.lock();
+        try {
+            return gameId;
+        } finally {
+            reentrantLock.unlock();
+        }
+
     }
 
     public void setGameId(short gameId) {
+        reentrantLock.lock();
         this.gameId = gameId;
+        reentrantLock.unlock();
     }
 }
