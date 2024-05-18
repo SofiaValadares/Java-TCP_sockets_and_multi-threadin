@@ -76,7 +76,12 @@ public class Player {
     }
 
     public short getPoints() {
-        return points;
+        reentrantLock.lock();
+        try {
+            return points;
+        } finally {
+            reentrantLock.unlock();
+        }
     }
 
     public synchronized void increasePoints(short amount) {

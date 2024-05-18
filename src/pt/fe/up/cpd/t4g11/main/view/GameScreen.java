@@ -88,6 +88,6 @@ public class GameScreen extends JFrame {
 
     public void displayMessageLow(String message) {
         // Exibe a nova mensagem na área de saída
-        outputArea.append(message);
+        outputArea.append(message + "\n");
     }
 }
