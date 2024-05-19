@@ -6,6 +6,7 @@ import src.pt.fe.up.cpd.t4g11.main.view.GameScreen;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 import static java.lang.Thread.sleep;
 import static src.pt.fe.up.cpd.t4g11.main.controller.Server.*;
@@ -52,6 +53,8 @@ public class Game implements Runnable {
                 printMessageInServer(i.getMessage());
             }
 
+            short round = 1;
+
             while (true) {
                 if(!allPlayersInGame(gameId)) {
                     if(!reconnectionChecker(screenManager,gameId)) break;
@@ -59,10 +62,29 @@ public class Game implements Runnable {
                 }
                 screenChecker(screenManager, gameId);
                 Calculation calc = MathGame.getRandomCalculation();
-                screenManager.displayMessageInScreens("There is new calculation to do: " + calc);
+                screenManager.displayMessageInScreens("Round " + round +"/20");
+                screenManager.displayMessageInScreensLow("There is new calculation to do: " + calc);
                 // TODO: Wait for user input.
+                short results = calc.getResult();
+                Player winnerOfTheRound = screenManager.playersAnser(results);
+
+
+                screenManager.displayMessageInScreensLow("\nPlayer " + winnerOfTheRound.getName() + " was the faster!!!\nAnser was " + results);
                 // TODO: The player that answers first gets points using calc.getPoints() then move to next
-                // TODO: Add amount of times that it will run until the game finishes
+                winnerOfTheRound.increasePoints(calc.givePoints());
+                round++;
+
+
+
+                try {
+                    Thread.sleep(3000); // 3 segundos
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (round > 20) {
+                    break;
+                }
             }
         } else {
             for (GameScreen screen: screenManager.getScreens())
@@ -76,6 +98,21 @@ public class Game implements Runnable {
             Thread.currentThread().interrupt();
         } else {
             //TODO: Display winner and close game
+            screenManager.displayMessageInScreens("End of the game! Thanks for all who played!!!");
+            Collections.sort(gamePlayers, new PlayerPointsComparator());
+
+            byte rank = 1;
+
+            for (Player player : gamePlayers) {
+                screenManager.displayMessageInScreensLow(rank + "º " + player.getName() + " - "  + player.getPoints() + " points");
+                rank++;
+            }
+
+            try {
+                Thread.sleep(3000); // 3 segundos
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

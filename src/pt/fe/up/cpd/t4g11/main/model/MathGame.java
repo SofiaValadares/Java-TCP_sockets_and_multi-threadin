@@ -9,13 +9,21 @@ public class MathGame {
         short num2 = getRandomShort();
         Operand op = getRandomOperator();
 
+        switch (op) {
+            case DIV -> {
+                while (num1 % num2 != 0) {
+                    num1 = getRandomShort();
+                }
+            }
+        }
+
         return new Calculation(num1, op, num2);
     }
 
     // Helper method to generate a random short number
     private static short getRandomShort() {
         Random random = new Random();
-        return (short) random.nextInt(Short.MAX_VALUE + 1);
+        return (short) (random.nextInt(99) + 1);
     }
 
     // Helper method to generate a random operator

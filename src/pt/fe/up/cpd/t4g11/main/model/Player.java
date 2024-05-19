@@ -9,7 +9,7 @@ public class Player {
     private final int playerId;
     private Socket playerSocket;
     private final String name;
-    private final short points;
+    private short points;
     private boolean inGame;
     private short gameId;
     private final ReentrantLock reentrantLock;
@@ -76,7 +76,21 @@ public class Player {
     }
 
     public short getPoints() {
-        return points;
+        reentrantLock.lock();
+        try {
+            return points;
+        } finally {
+            reentrantLock.unlock();
+        }
+    }
+
+    public synchronized void increasePoints(short amount) {
+        reentrantLock.lock();
+        try {
+            this.points += amount;
+        } finally {
+            reentrantLock.unlock();
+        }
     }
 
     public boolean isInGame() {
