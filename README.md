@@ -40,18 +40,18 @@ Neste projetos nos utilizamos a linguagem Java, com TCD sockets, threads and Ree
 <br>
 
 # Runing Project
-First you must have Java 21 installed on your machine
+First, you must have Java 21 installed on your machine.
 
 Link to install Java 21: https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html <br>
 Link to instal Intellij IDE: https://www.jetbrains.com/idea/ <br>
 
-1. Open the terminal and navegate to the foulder whem you where want to clone the project
-2. Clone the project using the comand
+1. Open the terminal and navigate to the folder where you want to clone the project.
+2. Clone the project using the command:
 <dt> 
 
     git clone https://github.com/SofiaValadares/Java-TCP_sockets_and_multi-threadin
 
 </dt>
 
-3. Now open the IntelliJ in the project folder, this folder will be incede the one you cloned and will have the name of the repository
+3. Now open IntelliJ in the project folder. This folder will be inside the one you cloned and will have the name of the repository.
 4. Explicar aqui como rodar
