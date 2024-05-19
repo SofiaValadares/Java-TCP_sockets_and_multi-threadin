@@ -30,7 +30,7 @@ Neste projetos nos utilizamos a linguagem Java, com TCD sockets, threads and Ree
     </td>
   </tr>
 </table>
-<br></br>
+<br>
 
 # Technologies Used
 
