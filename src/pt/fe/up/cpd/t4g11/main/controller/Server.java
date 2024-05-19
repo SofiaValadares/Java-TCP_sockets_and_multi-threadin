@@ -6,16 +6,18 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Server {
 
     public static final List<Player> players = new ArrayList<>();
-    private static final byte NUM_OF_MAIN_THREADS = 2;
+    private static final String USERS_FILE = "users.txt";
 
     public static void main(String[] args) {
         if (args.length < 1) return;
         int port = Integer.parseInt(args[0]);
+
+        // Criar o arquivo de usuários se não existir
+        createUsersFile();
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             printMessageInServer("Server started. Waiting for clients...");
@@ -54,9 +56,23 @@ public class Server {
         }
     }
 
+    private static void createUsersFile() {
+        File file = new File(USERS_FILE);
+        try {
+            if (file.createNewFile()) {
+                System.out.println("User file created: " + file.getName());
+            } else {
+                System.out.println("User file already exists.");
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while creating the user file.");
+            e.printStackTrace();
+        }
+    }
+
     private static void addPlayer(String playerName, Socket clientSocket) {
         // Add player to the queue
-        Player player = new Player(playerName,clientSocket);
+        Player player = new Player(playerName, clientSocket);
         boolean returned = false;
         synchronized (players) {
             for(Player listPlayer : players)
@@ -121,6 +137,5 @@ public class Server {
         writer.println(message);
     }
 
-    // Do here class to thread play game, frinst need game class
-
+    // Do here class to thread play game, for instance need game class
 }
