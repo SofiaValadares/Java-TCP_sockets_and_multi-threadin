@@ -54,4 +54,26 @@ Link to instal Intellij IDE: https://www.jetbrains.com/idea/ <br>
 </dt>
 
 3. Now open IntelliJ in the project folder. This folder will be inside the one you cloned and will have the name of the repository.
-4. Explicar aqui como rodar
+4. First compile the project using the comands
+<dt>
+    src/pt/fe/up/cpd/t4g11/main/controller/*.java
+</dt>
+    javac src/pt/fe/up/cpd/t4g11/main/model/*.java  
+<dt>
+    javac src/pt/fe/up/cpd/t4g11/main/utils/*.java
+</dt>
+<dt>
+    javac src/pt/fe/up/cpd/t4g11/main/view/*.java 
+</dt>
+5. Firt you open the Server whi the command
+<dt>
+   java Server 8000 
+</dt>
+6. Now for whith player you want you run the client whith the command
+<dt>
+   java Client localhost 8000
+</dt>
+7. Whith the Client open you do the login of a old player or creant a new just givin a new name and creating a password
+
+
+
