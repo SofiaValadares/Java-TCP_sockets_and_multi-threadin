@@ -1,7 +1,60 @@
-# Java TCP sockets and multi-threading
-Neste projetos nos utilizamos a linguagem Java, com TCD sockets, threads and Reentrant.
+# Math Game Client-Server System
 
- # GRUP
+## Project Description
+
+The implemented game is a MathGame where, in each round, the clients receive a calculation (Sum, Subtraction, Multiplication, or Division) to solve. Whoever replies first gets points. The game is playable 2 by 2. Unfortunately, we didn't manage to support more than 2 users per game.
+
+## Technologies Used
+
+- Java
+    - TCP Sockets
+    -   Java Threads
+    - Reentrant locks
+
+
+## Prerequisites
+
+- Java Development Kit (JDK) 21 or higher installed on your computer
+- A terminal or command line interface to run the commands
+
+## How to Run the Project
+
+### Steps
+
+1. **Clone the Repository or Download the Files**
+
+   ```sh
+   git clone git clone https://github.com/SofiaValadares/Java-TCP_sockets_and_multi-threadin
+   
+
+2. **Compile the Java Code**
+
+Open a terminal in the project directory and compile the Java files using the following command:
+
+`javac src/pt/fe/up/cpd/t4g11/main/controller/*.java src/pt/fe/up/cpd/t4g11/main/model/*.java`
+
+3. **Run the Server**
+
+In the terminal, navigate to the src directory and start the server with a specified port number (e.g., 8000):
+
+`java src.pt.fe.up.cpd.t4g11.main.controller.Server 8000`
+
+4. Run the Client(s)
+
+Open another terminal (you can open multiple terminals for multiple clients) and navigate to the src directory. Run the client with the server's hostname (usually localhost) and the same port number used for the server (e.g., 8000):
+
+
+`java src.pt.fe.up.cpd.t4g11.main.controller.Client localhost 8000`
+
+Repeat this step to start multiple games.
+
+The game will automatically start once 2 users are connected. It will first ask for a nickname and then password, after replying, the client will be in queue so start the game with another. After the game starts, there will a line in below part of the screen that will open.
+
+5. **Enjoy the game!** :)
+
+In case of doubts you can reach out to the team :)
+
+# Turma 13 - Grupo 11
 <table>
   <tr>
     <td align="center">
@@ -31,61 +84,3 @@ Neste projetos nos utilizamos a linguagem Java, com TCD sockets, threads and Ree
   </tr>
 </table>
 <br>
-
-# Technologies Used
-
-- **Language:** [Java 21](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
-- **IDE:** [IntelliJ IDE](https://www.jetbrains.com/idea/)
-
-<br>
-
-# Runing Project
-First, you must have Java 21 installed on your machine.
-
-Link to install Java 21: https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html <br>
-Link to instal Intellij IDE: https://www.jetbrains.com/idea/ <br>
-
-1. Open the terminal and navigate to the folder where you want to clone the project.
-2. Clone the project using the command:
-<dt> 
-
-    git clone https://github.com/SofiaValadares/Java-TCP_sockets_and_multi-threadin
-
-</dt>
-
-3. Now open IntelliJ in the project folder. This folder will be inside the one you cloned and will have the name of the repository.
-4. First compile the project using the comands
-<dt>
- 
-    src/pt/fe/up/cpd/t4g11/main/controller/*.java
-    
-</dt>
-
-    javac src/pt/fe/up/cpd/t4g11/main/model/*.java  
-    
-<dt>
- 
-    javac src/pt/fe/up/cpd/t4g11/main/utils/*.java
-    
-</dt>
-<dt>
- 
-    javac src/pt/fe/up/cpd/t4g11/main/view/*.java 
-    
-</dt>
-5. Firt you open the Server whi the command
-<dt>
- 
-    java Server 8000 
-   
-</dt>
-6. Now for whith player you want you run the client whith the command
-<dt>
- 
-    java Client localhost 8000
-   
-</dt>
-7. Whith the Client open you do the login of a old player or creant a new just givin a new name and creating a password
-
-
-
